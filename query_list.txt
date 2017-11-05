@@ -1,0 +1,6 @@
+dogs
+cats
+bike
+truck
+car
+ship
