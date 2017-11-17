@@ -5,7 +5,6 @@
 # $4: Height of final resized image
 
 ###################### Config ####################################
-
 num=$1;
 CRAWLER=
 OUTPUT_FLAG=-O     # For curl it changes to use '-o' in DetectEnv().
@@ -19,9 +18,10 @@ USERAGENT_STRING="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/53
 RESIZE_WIDTH=$4
 RESIZE_HEIGHT=$3
 CRAWLER_OPT=$2
-
 ##########################################################
 
+
+# Select crawler based on user choice
 function selectCrawler() {
   which wget > /dev/null 2>&1
   if [ $CRAWLER_OPT -eq 0 ] && [ $? -eq 0  ];then
@@ -45,6 +45,7 @@ function selectCrawler() {
   fi
 }
 
+# Download all images for a particular category from links stored in file.
 function downloadImages() {
   from_filename=$1
   save_dir=$2
@@ -58,6 +59,8 @@ function downloadImages() {
   done < $from_filename
 }
 
+
+# Parse results page, match the image urls 
 function parsePage() {
   if [ -e results ];then
     rm -rf results;
