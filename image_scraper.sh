@@ -74,13 +74,13 @@ function parsePage() {
   while read query
   do
     echo "-> Scraping $query"
-    touch results/${k}_objURL-list_${query};
+    touch results/${k}_URL-List_${query};
     for((i=1; i<=$round; i++))
     do
       (
         $CRAWLER $QUITE_FLAG $RETRY_FLAG $RETRY_NUM $ROBOTS_CMD $FOLLOW_REDIRECT $USERAGENT_FLAG "$USERAGENT_STRING" "http://images.google.com/images?q=${query}&start=$((($i-1)*20))&sout=1" $OUTPUT_FLAG results/${k}_${query}_${i};
-# Non-greedy mode, to match only image url src part.
-        cat results/${k}_${query}_${i}| egrep 'src="http.*?"' -o | awk -F'"' '{print $2}' >> results/${k}_objURL-list_${query};
+        # Non-greedy mode, to match only image url src part.
+        cat results/${k}_${query}_${i}| egrep 'src="http.*?"' -o | awk -F'"' '{print $2}' >> results/${k}_URL-List_${query};
       ) &
     done
 
@@ -88,18 +88,18 @@ function parsePage() {
       (
         $CRAWLER $QUITE_FLAG $RETRY_FLAG $RETRY_NUM $ROBOTS_CMD $FOLLOW_REDIRECT $USERAGENT_FLAG "$USERAGENT_STRING" "http://images.google.com/images?q=${query}&start=$((($i-1)*20))&sout=1&num=${remain}" $OUTPUT_FLAG results/${k}_${query}_${i};
         # Non-greedy mode, to match only image url src part.
-        cat results/${k}_${query}_${i}| egrep 'src="http.*?"' -o | awk -F'"' '{print $2}' >> results/${k}_objURL-list_${query}
+        cat results/${k}_${query}_${i}| egrep 'src="http.*?"' -o | awk -F'"' '{print $2}' >> results/${k}_URL-List_${query}
       ) &
     fi
     # Waiting for background jobs to finish before removing temporary files and downloading images
     wait
     (
       rm -rf results/${k}_${query}*
-      downloadImages results/${k}_objURL-list_${query} results/$query
+      downloadImages results/${k}_URL-List_${query} results/$query
     ) &
 
     k=$(($k+1));
-  done < query_list.txt
+  done < query_list.txt &
 
 }
 
