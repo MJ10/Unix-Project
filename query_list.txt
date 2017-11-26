@@ -1,6 +1,4 @@
-dogs
-cats
-bike
-truck
-car
-ship
+apples
+oranges
+bananas
+fruits
