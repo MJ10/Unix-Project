@@ -14,8 +14,10 @@ bash image_scraper.sh <number_of_images_per_category> <0 to use wget, 1 to use c
 ```
 The images will be downloaded category-wise in separate folders
 
-## Team
+## Presentation
+Presentation for the project can be found [here](http://slides.com/mokshjain/unix)
 
+## Team
 * [Moksh Jain](https://github.com/MJ10), 16IT221
 * [Suyash Ghuge](https://github.com/suyash0103), 16IT114
 * [Nishanth Hebbar](https://github.com/nishanthebbar2011), 16IT234
