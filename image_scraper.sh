@@ -4,10 +4,16 @@
 # $3: Width of final resized image
 # $4: Height of final resized image
 
+if [ $# -ne 4 ];then
+  echo "Error: Invalid arguments!"
+  echo "Syntax: ./image_scraper.sh <number_of_images> <0 (wget) or 1 (curl)> <output_image_height> <output_image_width>"
+  exit 1
+fi  
+
 ###################### Config ####################################
-num=$1;
+num=$1
 CRAWLER=
-OUTPUT_FLAG=-O     # For curl it changes to use '-o' in DetectEnv().
+OUTPUT_FLAG=-O     # For curl it changes to use '-o'
 RETRY_FLAG=-t      # Default retrying flag (for wget). For curl using '--retry <num>'.
 RETRY_NUM=3        # Crawler retries <num> times if here's a connection issue.
 QUITE_FLAG=-q      # Turning off crawler's logging output. For curl using '-s'.
@@ -53,7 +59,6 @@ function downloadImages() {
   curr=1
   while read url
   do
-    suffix=$(basename ${url})
     $CRAWLER $QUITE_FLAG $RETRY_FLAG $RETRY_NUM $USERAGENT_FLAG "$USERAGENT_STRING" $url $OUTPUT_FLAG $save_dir/${curr}.png && convert $save_dir/$curr.png -resize $RESIZE_WIDTH\x$RESIZE_HEIGHT! $save_dir/$curr.png &
     curr=$(($curr+1))
   done < $from_filename
@@ -67,30 +72,22 @@ function parsePage() {
   fi
   mkdir results;
 
-  local k=1;
+  k=1
   
-  round=$(($num));
-  remain=$(($num - ${round}*20));
   while read query
   do
     echo "-> Scraping $query"
     touch results/${k}_URL-List_${query};
-    for((i=1; i<=$round; i++))
+    for((i=1; i<=$num; i++))
     do
       (
-        $CRAWLER $QUITE_FLAG $RETRY_FLAG $RETRY_NUM $ROBOTS_CMD $FOLLOW_REDIRECT $USERAGENT_FLAG "$USERAGENT_STRING" "http://images.google.com/images?q=${query}&start=$((($i-1)*20))&sout=1" $OUTPUT_FLAG results/${k}_${query}_${i};
-        # Non-greedy mode, to match only image url src part.
-        cat results/${k}_${query}_${i}| egrep 'src="http.*?"' -o | awk -F'"' '{print $2}' >> results/${k}_URL-List_${query};
-      ) &
-    done
-
-    if [ $remain -ne 0 ];then
-      (
-        $CRAWLER $QUITE_FLAG $RETRY_FLAG $RETRY_NUM $ROBOTS_CMD $FOLLOW_REDIRECT $USERAGENT_FLAG "$USERAGENT_STRING" "http://images.google.com/images?q=${query}&start=$((($i-1)*20))&sout=1&num=${remain}" $OUTPUT_FLAG results/${k}_${query}_${i};
+        $CRAWLER $QUITE_FLAG $RETRY_FLAG $RETRY_NUM $ROBOTS_CMD $FOLLOW_REDIRECT $USERAGENT_FLAG "$USERAGENT_STRING" "http://images.google.com/images?q=${query}&start=$((($i-1)*20))&sout=1" $OUTPUT_FLAG results/${k}_${query}_${i}
         # Non-greedy mode, to match only image url src part.
         cat results/${k}_${query}_${i}| egrep 'src="http.*?"' -o | awk -F'"' '{print $2}' >> results/${k}_URL-List_${query}
       ) &
-    fi
+    done
+
+    
     # Waiting for background jobs to finish before removing temporary files and downloading images
     wait
     (
@@ -99,11 +96,11 @@ function parsePage() {
     ) &
 
     k=$(($k+1));
-  done < query_list.txt &
+  done < query_list.txt
 
 }
 
 ### main() ###
 selectCrawler
-parsePage $num
+parsePage
 wait
